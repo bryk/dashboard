@@ -49,32 +49,6 @@ const clusterHealthzUrl = `http://${conf.backend.apiServerHost}/healthz`;
 let clusterProcess = null;
 
 /**
- * @type {boolean} The variable is set when there is an error during cluster creation.
- */
-let clusterSpawnFailure = null;
-
-/**
- * A Number, representing the ID value of the timer that is set for function which periodically
- * checks if cluster is running. The null means that no timer is running.
- *
- * @type {?number}
- */
-let isRunningSetIntervalHandler = null;
-
-/**
- * Checks if there was a failure during cluster creation.
- * Produces an error in case there was one.
- * @param {function(?Error=)} doneFn - callback for the error
- */
-function checkForClusterFailure(doneFn) {
-  if (clusterSpawnFailure) {
-    clearTimeout(isRunningSetIntervalHandler);
-    isRunningSetIntervalHandler = null;
-    doneFn(new Error('There was an error during cluster creation. Aborting.'));
-  }
-}
-
-/**
  * Checks if cluster health check return correct status.
  * When custer is up and running then return 'ok'.
  * @param {function(?Error=)} doneFn
@@ -111,22 +85,53 @@ function executeKubectlCommand(command, doneFn) {
  *  * Install golang
  *  * Install etcd
  */
-gulp.task('local-up-cluster', ['spawn-cluster']);
+gulp.task(
+    'local-up-cluster',
+    [
+      'checkout-kubernetes-version',
+      'kubeconfig-set-cluster-local',
+      'kubeconfig-set-context-local',
+      'kubeconfig-use-context-local',
+    ],
+    function(doneFn) {
+      let isRunningSetIntervalHandler = setInterval(isRunning, 1000);
+      let doneCalled = false;
 
-/**
- * Tears down a Kubernetes cluster.
- */
-gulp.task('kill-cluster', function(doneFn) {
-  if (clusterProcess) {
-    clusterProcess.on('exit', function() {
-      clusterProcess = null;
-      doneFn();
+      function myDone(result) {
+        if (!doneCalled) {
+          clearInterval(isRunningSetIntervalHandler);
+          doneCalled = true;
+          doneFn(result);
+        }
+      }
+
+      clusterProcess = childProcess.spawn(upScript, {stdio: 'inherit'});
+
+      clusterProcess.on('exit', function(code) {
+        if (code !== 0) {
+          myDone(new Error(`Cluster finished abnormally ${code}`));
+        }
+        clusterProcess = null;
+      });
+
+      let counter = 0;
+
+      function isRunning() {
+        if (counter % 10 === 9) {
+          gulpUtil.log(
+              gulpUtil.colors.magenta(
+                  `Waiting for a Kubernetes cluster on ${conf.backend.apiServerHost}...`));
+        }
+        counter += 1;
+
+        // constantly query the cluster until it is properly running
+        clusterHealthCheck(function(result) {
+          if (result === 'ok') {
+            myDone();
+          }
+        });
+      }
     });
-    clusterProcess.kill();
-  } else {
-    doneFn();
-  }
-});
 
 /**
  * Clones kubernetes from git repository. Task skip if kubernetes directory exist.
@@ -182,56 +187,17 @@ gulp.task('download-kubectl', function(doneFn) {
 gulp.task('clear-kubernetes', function() { return del(conf.paths.kubernetes); });
 
 /**
- * Spawns local-up-cluster.sh script.
+ * Tears down a Kubernetes cluster.
  */
-gulp.task(
-    'spawn-cluster',
-    [
-      'checkout-kubernetes-version',
-      'kubeconfig-set-cluster-local',
-      'kubeconfig-set-context-local',
-      'kubeconfig-use-context-local',
-      'kill-cluster',
-    ],
-    function() {
-      clusterProcess = childProcess.spawn(upScript, {stdio: 'inherit'});
-
-      clusterProcess.on('exit', function(code) {
-        if (code !== 0) {
-          clusterSpawnFailure = code;
-        }
-        clusterProcess = null;
-      });
+gulp.task('kill-cluster', function(doneFn) {
+  if (clusterProcess) {
+    clusterProcess.on('exit', function() {
+      clusterProcess = null;
+      doneFn();
     });
-
-/**
- * Checks periodically if cluster is up and running.
- */
-gulp.task('wait-for-cluster', function(doneFn) {
-  let counter = 0;
-  if (!isRunningSetIntervalHandler) {
-    isRunningSetIntervalHandler = setInterval(isRunning, 1000);
-  }
-
-  function isRunning() {
-    if (counter % 10 === 0) {
-      gulpUtil.log(
-          gulpUtil.colors.magenta(
-              `Waiting for a Kubernetes cluster on ${conf.backend.apiServerHost}...`));
-    }
-    counter += 1;
-
-    checkForClusterFailure(doneFn);
-
-    // constantly query the cluster until it is properly running
-    clusterHealthCheck(function(result) {
-      if (result === 'ok') {
-        gulpUtil.log(gulpUtil.colors.magenta('Kubernetes cluster is up and running.'));
-        clearTimeout(isRunningSetIntervalHandler);
-        isRunningSetIntervalHandler = null;
-        doneFn();
-      }
-    });
+    clusterProcess.kill();
+  } else {
+    doneFn();
   }
 });
 

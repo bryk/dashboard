@@ -31,13 +31,17 @@ import conf from './conf';
  *
  * This task should be used prior to publishing a change.
  **/
-gulp.task('check', ['lint', 'build', 'test', 'integration-test:prod']);
+gulp.task('check', ['lint', 'build', 'test']);
 
 /**
- * Checks the code quality of Dashboard. In addition a local kubernetes cluster is spawned.
- * NOTE: This is meant as an entry point for CI jobs.
+ * TODO
  */
-gulp.task('check:create-cluster', ['local-up-cluster', 'check']);
+gulp.task('check-full', ['check', 'integration-test:prod']);
+
+/**
+ * TODO
+ */
+gulp.task('check-full:create-cluster', ['check', 'integration-test:prod:create-cluster']);
 
 /**
  * Lints all projects code files.
