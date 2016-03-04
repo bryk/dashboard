@@ -34,6 +34,8 @@ describe('Deploy from invalid file user story test', () => {
     let fileToUpload = '../deploy/invalid-rc.yaml';
     let absolutePath = path.resolve(__dirname, fileToUpload);
 
+    console.log(absolutePath);
+
     // when
     deployFromFilePage.filePicker.sendKeys(absolutePath);
     deployFromFilePage.deployButton.click();
