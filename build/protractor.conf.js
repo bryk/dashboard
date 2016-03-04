@@ -68,7 +68,7 @@ function createConfig() {
     config.maxSessions = 1;
 
   } else {
-    config.capabilities = {'browserName': 'chrome'};
+    config.capabilities = {'browserName': 'firefox'};
   }
 
   return config;

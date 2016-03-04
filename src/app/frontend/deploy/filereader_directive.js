@@ -38,9 +38,11 @@ export default function fileReaderDirective($log) {
         }
         let reader = new FileReader();
         reader.onload = (event) => {
-          /** @type {!angular.NgModelController} */
-          let ngModelController = ctrls[1];
-          ngModelController.$setViewValue({name: file.name, content: event.target.result});
+          scope.$apply(() => {
+            /** @type {!angular.NgModelController} */
+            let ngModelController = ctrls[1];
+            ngModelController.$setViewValue({name: file.name, content: event.target.result});
+          });
         };
         reader.onerror = (error) => $log.error('Error reading file:', error);
         reader.readAsText(file);
