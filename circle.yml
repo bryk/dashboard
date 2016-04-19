@@ -1,0 +1,11 @@
+machine:
+  node:
+    version: 5.5.0
+  environment:
+    IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+
+test:
+  override:
+    - ./node_modules/.bin/gulp build test
+  post:
+    - ./node_modules/.bin/gulp coverage-codecov-upload
