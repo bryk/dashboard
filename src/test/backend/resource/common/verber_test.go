@@ -2,7 +2,6 @@ package common
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"reflect"
 	"testing"
@@ -23,18 +22,16 @@ type FakeRESTClient struct {
 
 func (c *FakeRESTClient) Delete() *restclient.Request {
 	return restclient.NewRequest(clientFunc(func(req *http.Request) (*http.Response, error) {
-		fmt.Printf("%#v\n", req.URL)
-		return nil, errors.New("err")
+		return c.response, c.err
 	}), "DELETE", nil, "/api/v1", restclient.ContentConfig{}, nil, nil)
 }
 
 func TestDeleteShouldPropagateErrors(t *testing.T) {
-	verber := ResourceVerber{client: &FakeRESTClient{}}
+	verber := ResourceVerber{client: &FakeRESTClient{err: errors.New("err")}}
 
 	err := verber.Delete("replicaset", "bar", "baz")
 
 	if !reflect.DeepEqual(err, errors.New("err")) {
 		t.Fatalf("Expected error on verber delete but got %#v", err)
 	}
-	t.Fatalf("foo")
 }
