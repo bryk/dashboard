@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import componentsModule from './../common/components/components_module';
+import componentsModule from 'common/components/components_module';
+import resourceModule from 'common/resource/resource_module';
 import filtersModule from 'common/filters/filters_module';
 import logsModule from 'logs/logs_module';
 import podListModule from 'podlist/podlist_module';
@@ -38,6 +39,7 @@ export default angular
           filtersModule.name,
           logsModule.name,
           podListModule.name,
+          resourceModule.name,
         ])
     .config(stateConfig)
     .component('kdReplicationControllerInfo', replicationControllerInfoComponent)

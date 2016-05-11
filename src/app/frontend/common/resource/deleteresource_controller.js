@@ -12,28 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {StateParams} from './replicationcontrollerdetail_state';
-import {getReplicationControllerDetailsResource} from './replicationcontrollerdetail_stateconfig';
-
 /**
  * Controller for the delete replication controller dialog.
  *
  * @final
  */
-export default class DeleteReplicationControllerDialogController {
+export class DeleteResourceController {
   /**
    * @param {!md.$dialog} $mdDialog
    * @param {!angular.$resource} $resource
-   * @param {string} namespace
-   * @param {string} replicationController
    * @ngInject
    */
-  constructor($mdDialog, $resource, namespace, replicationController) {
-    /** @export {string} */
-    this.replicationController = replicationController;
+  constructor($mdDialog, $resource, objectMeta, typeMeta) {
+    /** @private {string} */
+    this.typeMeta_ = typeMeta;
 
     /** @export {string} */
-    this.namespace = namespace;
+    this.objectMeta = objectMeta;
 
     /** @export {boolean} */
     this.deleteServices = true;
@@ -46,21 +41,21 @@ export default class DeleteReplicationControllerDialogController {
   }
 
   /**
-   * Deletes the replication controller and closes the dialog.
-   *
    * @export
    */
-  remove() {
-    let resource = getReplicationControllerDetailsResource(
-        new StateParams(this.namespace, this.replicationController), this.resource_);
-
-    /** @type {!backendApi.DeleteReplicationControllerSpec} */
-    let deleteReplicationControllerSpec = {
-      deleteServices: this.deleteServices,
-    };
-
+  delete() {
+    console.log('deleting', this.typeMeta_, this.objectMeta)
+    // let resource = getReplicationControllerDetailsResource(
+    //     new StateParams(this.namespace, this.replicationController), this.resource_);
+    //
+    // /** @type {!backendApi.DeleteReplicationControllerSpec} */
+    // let deleteReplicationControllerSpec = {
+    //   deleteServices: this.deleteServices,
+    // };
+    //
+    let resource = this.resource_(`api/v1/${this.typeMeta_.kind}/namespace/${this.objectMeta.namespace}/name/${this.objectMeta.name}`)
     resource.remove(
-        deleteReplicationControllerSpec, () => { this.mdDialog_.hide(); },
+        () => { this.mdDialog_.hide(); },
         () => { this.mdDialog_.cancel(); });
   }
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import DeleteReplicationControllerDialogController from './deletereplicationcontroller_controller';
+import {DeleteResourceController} from './deleteresource_controller';
 
 /**
  * @param {!md.$dialog} mdDialog
@@ -20,16 +20,15 @@ import DeleteReplicationControllerDialogController from './deletereplicationcont
  * @param {string} replicationController
  * @return {!angular.$q.Promise}
  */
-export default function showDeleteReplicationControllerDialog(
-    mdDialog, namespace, replicationController) {
+export default function showDeleteDialog(mdDialog, typeMeta, objectMeta) {
   return mdDialog.show({
-    controller: DeleteReplicationControllerDialogController,
-    controllerAs: 'ctrl',
+    controller: DeleteResourceController,
+    controllerAs: '$ctrl',
     clickOutsideToClose: true,
-    templateUrl: 'replicationcontrollerdetail/deletereplicationcontroller.html',
+    templateUrl: 'common/resource/deleteresource.html',
     locals: {
-      'namespace': namespace,
-      'replicationController': replicationController,
+      'typeMeta': typeMeta,
+      'objectMeta': objectMeta,
     },
   });
 }

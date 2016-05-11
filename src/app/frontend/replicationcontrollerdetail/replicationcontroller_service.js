@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import showDeleteReplicationControllerDialog from './deletereplicationcontroller_dialog';
-import showUpdateReplicasDialog from './updatereplicas_dialog';
-
 /**
  * Opens replication controller delete dialog.
  *
@@ -25,9 +22,11 @@ export class ReplicationControllerService {
    * @param {!md.$dialog} $mdDialog
    * @ngInject
    */
-  constructor($mdDialog) {
+  constructor($mdDialog, kdResourceVerberService) {
     /** @private {!md.$dialog} */
     this.mdDialog_ = $mdDialog;
+
+    this.kdResourceVerberService_ = kdResourceVerberService;
   }
 
   /**
@@ -40,7 +39,7 @@ export class ReplicationControllerService {
    * @return {!angular.$q.Promise}
    */
   showDeleteDialog(namespace, replicationController) {
-    return showDeleteReplicationControllerDialog(this.mdDialog_, namespace, replicationController);
+    return this.kdResourceVerberService_.showDeleteDialog(namespace, replicationController);
   }
 
   /**

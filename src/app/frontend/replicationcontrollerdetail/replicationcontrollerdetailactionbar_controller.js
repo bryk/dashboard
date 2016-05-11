@@ -81,8 +81,9 @@ export default class ReplicationControllerDetailActionBarController {
    * @export
    */
   handleDeleteReplicationControllerDialog() {
+    console.log(this.details_);
     this.kdReplicationControllerService_
-        .showDeleteDialog(this.stateParams_.namespace, this.stateParams_.replicationController)
+        .showDeleteDialog(this.details_.typeMeta, this.details_.objectMeta)
         .then(this.onReplicationControllerDeleteSuccess_.bind(this));
   }
 

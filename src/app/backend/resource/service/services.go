@@ -82,8 +82,8 @@ func GetServiceList(client client.Interface) (*ServiceList, error) {
 
 func getServices(service *api.Service) Service {
 	return Service{
-		ObjectMeta:       common.CreateObjectMeta(service.ObjectMeta),
-		TypeMeta:         common.CreateTypeMeta(service.TypeMeta),
+		ObjectMeta:       common.NewObjectMeta(service.ObjectMeta),
+		TypeMeta:         common.NewTypeMeta(common.ResourceKindService),
 		InternalEndpoint: common.GetInternalEndpoint(service.Name, service.Namespace, service.Spec.Ports),
 		// TODO(maciaszczykm): Fill ExternalEndpoints with data.
 		Selector: service.Spec.Selector,

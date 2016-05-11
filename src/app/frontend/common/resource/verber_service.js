@@ -12,17 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-@import '../variables';
+import showDeleteDialog from './deleteresource_dialog';
 
-md-checkbox {
-  &.kd-deletedialog-services-checkbox {
-    margin: $baseline-grid 0 0 $baseline-grid;
+/**
+ * @final
+ */
+export class VerberService {
+  /**
+   * @param {!md.$dialog} $mdDialog
+   * @ngInject
+   */
+  constructor($mdDialog) {
+    /** @private {!md.$dialog} */
+    this.mdDialog_ = $mdDialog;
   }
-}
 
-.kd-deletedialog-info-icon {
-  font-size: $subhead-font-size-base;
-  height: $subhead-font-size-base;
-  line-height: $caption-font-size-base;
-  margin-left: $baseline-grid / 2;
+  /**
+   * @export
+   */
+  showDeleteDialog(typeMeta, objectMeta) {
+    return showDeleteDialog(this.mdDialog_, typeMeta, objectMeta);
+  }
 }
