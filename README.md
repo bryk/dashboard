@@ -1,5 +1,6 @@
 # Kubernetes Dashboard
 [![Build Status](https://travis-ci.org/kubernetes/dashboard.svg?branch=master)](https://travis-ci.org/kubernetes/dashboard)
+[![Sauce Labs Build Status](https://saucelabs.com/open_sauce/build_matrix/k8s-dashboard-ci.svg)](https://saucelabs.com/beta/builds/f9b99b7eb0e148eb806e2ae00040a887)
 [![Coverage Status](https://codecov.io/github/kubernetes/dashboard/coverage.svg?branch=master)](https://codecov.io/github/kubernetes/dashboard?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kubernetes/dashboard)](https://goreportcard.com/report/github.com/kubernetes/dashboard)
 
