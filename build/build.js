@@ -33,85 +33,12 @@ import {multiDest} from './multidest';
 /**
  * Builds production package for current architecture and places it in the dist directory.
  */
-gulp.task('build', ['backend:prod', 'build-frontend']);
+gulp.task('build', ['backend:prod']);
 
 /**
  * Builds production packages for all supported architecures and places them in the dist directory.
  */
-gulp.task('build:cross', ['backend:prod:cross', 'build-frontend:cross']);
-
-/**
- * Builds production version of the frontend application for the default architecture.
- */
-gulp.task(
-    'build-frontend', ['localize', 'locales-for-backend'], function() { return doRevision(); });
-
-/**
- * Builds production version of the frontend application for all supported architectures.
- */
-gulp.task('build-frontend:cross', ['localize:cross', 'locales-for-backend:cross'], function() {
-  return doRevision();
-});
-
-/**
- * Localizes all pre-created frontend copies for the default arch, so that they are ready to serve.
- */
-gulp.task('localize', ['frontend-copies'], function() {
-  return localize([path.join(conf.paths.distPre, conf.arch.default, 'public')]);
-});
-
-/**
- * Localizes all pre-created frontend copies in all cross-arch directories, so that they are ready
- * to serve.
- */
-gulp.task('localize:cross', ['frontend-copies:cross'], function() {
-  return localize(conf.arch.list.map((arch) => path.join(conf.paths.distPre, arch, 'public')));
-});
-
-/**
- * Copies the locales configuration to the default arch directory.
- * This configuration file is then used by the backend to localize dashboard.
- */
-gulp.task('locales-for-backend', ['clean-dist'], function() {
-  return localesForBackend([conf.paths.dist]);
-});
-
-/**
- * Copies the locales configuration to each arch directory.
- * This configuration file is then used by the backend to localize dashboard.
- */
-gulp.task('locales-for-backend:cross', ['clean-dist'], function() {
-  return localesForBackend(conf.paths.distCross);
-});
-
-/**
- * Builds production version of the frontend application for the default architecture
- * (one copy per locale) and plcaes it under .tmp/dist , preparing it for localization and revision.
- */
-gulp.task(
-    'frontend-copies',
-    ['fonts', 'icons', 'assets', 'dependency-images', 'index:prod', 'clean-dist'], function() {
-      return createFrontendCopies([path.join(conf.paths.distPre, conf.arch.default, 'public')]);
-    });
-
-/**
- * Builds production versions of the frontend application for all architecures
- * (one copy per locale) and places them under .tmp, preparing them for localization and revision.
- */
-gulp.task(
-    'frontend-copies:cross',
-    [
-      'fonts:cross',
-      'icons:cross',
-      'assets:cross',
-      'dependency-images:cross',
-      'index:prod',
-      'clean-dist',
-    ],
-    function() {
-      return createFrontendCopies(
-          conf.arch.list.map((arch) => path.join(conf.paths.distPre, arch, 'public')));
-    });
+gulp.task('build:cross', ['backend:prod:cross']);
 
 /**
  * Copies assets to the dist directory for current architecture.

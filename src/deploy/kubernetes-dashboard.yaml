@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: kubernetes-dashboard
-        image: gcr.io/google_containers/kubernetes-dashboard-amd64:v1.1.0
+        image: gcr.io/static-pottery-460/bryk-empathy-amd64:v1.0.0
         imagePullPolicy: Always
         ports:
         - containerPort: 9090
@@ -61,7 +61,7 @@ metadata:
   name: kubernetes-dashboard
   namespace: kube-system
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
   - port: 80
     targetPort: 9090

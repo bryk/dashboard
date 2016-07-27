@@ -16,8 +16,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -32,10 +32,6 @@ var (
 		"to connect to in the format of protocol://address:port, e.g., "+
 		"http://localhost:8080. If not specified, the assumption is that the binary runs inside a"+
 		"Kubernetes cluster and local discovery is attempted.")
-	argHeapsterHost = pflag.String("heapster-host", "", "The address of the Heapster Apiserver "+
-		"to connect to in the format of protocol://address:port, e.g., "+
-		"http://localhost:8082. If not specified, the assumption is that the binary runs inside a"+
-		"Kubernetes cluster and service proxy will be used.")
 )
 
 func main() {
@@ -59,17 +55,8 @@ func main() {
 	}
 	log.Printf("Successful initial request to the apiserver, version: %s", versionInfo.String())
 
-	heapsterRESTClient, err := client.CreateHeapsterRESTClient(*argHeapsterHost, apiserverClient)
-	if err != nil {
-		log.Printf("Could not create heapster client: %s. Continuing.", err)
-	}
+	http.Handle("/", handler.CreateHttpApiHandler(apiserverClient, config))
 
-	// Run a HTTP server that serves static public files from './public' and handles API calls.
-	// TODO(bryk): Disable directory listing.
-	http.Handle("/", handler.MakeGzipHandler(handler.CreateLocaleHandler()))
-	http.Handle("/api/", handler.CreateHttpApiHandler(apiserverClient, heapsterRESTClient, config))
-	// TODO(maciaszczykm): Move to /appConfig.json as it was discussed in #640.
-	http.Handle("/api/appConfig.json", handler.AppHandler(handler.ConfigHandler))
 	log.Print(http.ListenAndServe(fmt.Sprintf(":%d", *argPort), nil))
 }
 

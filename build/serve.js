@@ -38,7 +38,6 @@ export const browserSyncInstance = browserSync.create();
 const backendDevArgs = [
   `--apiserver-host=${conf.backend.apiServerHost}`,
   `--port=${conf.backend.devServerPort}`,
-  `--heapster-host=${conf.backend.heapsterServerHost}`,
 ];
 
 /**
@@ -49,7 +48,6 @@ const backendDevArgs = [
 const backendArgs = [
   `--apiserver-host=${conf.backend.apiServerHost}`,
   `--port=${conf.frontend.serverPort}`,
-  `--heapster-host=${conf.backend.heapsterServerHost}`,
 ];
 
 /**
@@ -116,12 +114,12 @@ function serveDevelopmentMode() {
  * Serves the application in development mode. Watches for changes in the source files to rebuild
  * development artifacts.
  */
-gulp.task('serve', ['spawn-backend', 'watch'], serveDevelopmentMode);
+gulp.task('serve', ['spawn-backend'], serveDevelopmentMode);
 
 /**
  * Serves the application in development mode.
  */
-gulp.task('serve:nowatch', ['spawn-backend', 'index'], serveDevelopmentMode);
+gulp.task('serve:nowatch', ['spawn-backend'], serveDevelopmentMode);
 
 /**
  * Serves the application in production mode.
@@ -132,7 +130,7 @@ gulp.task('serve:prod', ['spawn-backend:prod']);
  * Spawns new backend application process and finishes the task immediately. Previously spawned
  * backend process is killed beforehand, if any. The frontend pages are served by BrowserSync.
  */
-gulp.task('spawn-backend', ['backend', 'kill-backend', 'locales-for-backend:dev'], function() {
+gulp.task('spawn-backend', ['backend', 'kill-backend'], function() {
   runningBackendProcess = child.spawn(
       path.join(conf.paths.serve, conf.backend.binaryName), backendDevArgs,
       {stdio: 'inherit', cwd: conf.paths.serve});
