@@ -130,6 +130,11 @@ gulp.task('serve:nowatch', ['spawn-backend', 'index'], serveDevelopmentMode);
 gulp.task('serve:prod', ['spawn-backend:prod']);
 
 /**
+ * Serves the application in production mode.
+ */
+gulp.task('serve:prod:prod-backend', ['spawn-backend:prod:prod-backend']);
+
+/**
  * Spawns new backend application process and finishes the task immediately. Previously spawned
  * backend process is killed beforehand, if any. The frontend pages are served by BrowserSync.
  */
@@ -149,16 +154,31 @@ gulp.task('spawn-backend', ['backend', 'kill-backend', 'locales-for-backend:dev'
  * backend process is killed beforehand, if any. In production the backend does serve the frontend
  * pages as well.
  */
-gulp.task('spawn-backend:prod', ['build-frontend', 'backend', 'kill-backend'], function() {
-  runningBackendProcess = child.spawn(
-      path.join(conf.paths.serve, conf.backend.binaryName), backendArgs,
-      {stdio: 'inherit', cwd: conf.paths.dist});
+gulp.task('spawn-backend:prod', ['spawn-backend:prod-internal', 'backend']);
 
-  runningBackendProcess.on('exit', function() {
-    // Mark that there is no backend process running anymore.
-    runningBackendProcess = null;
-  });
-});
+/**
+ * Spawns new backend application process and finishes the task immediately. Previously spawned
+ * backend process is killed beforehand, if any. In production the backend does serve the frontend
+ * pages as well.
+ */
+gulp.task('spawn-backend:prod:prod-backend', ['spawn-backend:prod-internal', 'backend:prod']);
+
+/**
+ * Spawns new backend application process and finishes the task immediately. Previously spawned
+ * backend process is killed beforehand, if any. In production the backend does serve the frontend
+ * pages as well.
+ */
+gulp.task(
+    'spawn-backend:prod-internal', ['build-frontend', 'backend:prod', 'kill-backend'], function() {
+      runningBackendProcess = child.spawn(
+          path.join(conf.paths.serve, conf.backend.binaryName), backendArgs,
+          {stdio: 'inherit', cwd: conf.paths.dist});
+
+      runningBackendProcess.on('exit', function() {
+        // Mark that there is no backend process running anymore.
+        runningBackendProcess = null;
+      });
+    });
 
 /**
  * Copies the locales configuration to the serve directory.
