@@ -40,7 +40,7 @@ const arch = {
   /**
    * List of all supported architectures by this project.
    */
-  list: ['amd64', 'arm', 'arm64', 'ppc64le'],
+  list: ['amd64'],
 };
 
 /**
@@ -60,7 +60,7 @@ const version = {
 /**
  * Base name for the docker image.
  */
-const imageNameBase = 'hub.docker.com/kubernetesdashboardtest/reviewapp';
+const imageNameBase = 'kubernetesdashboardtest/review-app';
 
 /**
  * Exported configuration object with common constants used in build pipeline.
