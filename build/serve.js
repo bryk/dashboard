@@ -37,9 +37,6 @@ export const browserSyncInstance = browserSync.create();
  * @type {!Array<string>}
  */
 const backendDevArgs = [
-  `--apiserver-host=${conf.backend.apiServerHost}`,
-  `--port=${conf.backend.devServerPort}`,
-  `--heapster-host=${conf.backend.heapsterServerHost}`,
 ];
 
 /**
@@ -48,9 +45,6 @@ const backendDevArgs = [
  * @type {!Array<string>}
  */
 const backendArgs = [
-  `--apiserver-host=${conf.backend.apiServerHost}`,
-  `--port=${conf.frontend.serverPort}`,
-  `--heapster-host=${conf.backend.heapsterServerHost}`,
 ];
 
 /**
@@ -188,24 +182,7 @@ gulp.task('kill-backend', function(doneFn) {
 /**
  * Watches for changes in source files and runs Gulp tasks to rebuild them.
  */
-gulp.task('watch', ['index', 'angular-templates'], function() {
-  gulp.watch([path.join(conf.paths.frontendSrc, 'index.html'), 'bower.json'], ['index']);
+gulp.task('watch', [], function() {
 
-  gulp.watch(
-      [
-        path.join(conf.paths.frontendSrc, '**/*.scss'),
-      ],
-      function(event) {
-        if (event.type === 'changed') {
-          // If this is a file change, rebuild only styles - nothing more is needed.
-          gulp.start('styles');
-        } else {
-          // If this is new/deleted file, everything has to be rebuilt.
-          gulp.start('index');
-        }
-      });
-
-  gulp.watch(path.join(conf.paths.frontendSrc, '**/*.js'), ['scripts-watch']);
-  gulp.watch(path.join(conf.paths.frontendSrc, '**/*.html'), ['angular-templates']);
   gulp.watch(path.join(conf.paths.backendSrc, '**/*.go'), ['spawn-backend']);
 });

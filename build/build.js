@@ -35,12 +35,12 @@ import {multiDest} from './multidest';
 /**
  * Builds production package for current architecture and places it in the dist directory.
  */
-gulp.task('build', ['backend:prod', 'build-frontend']);
+gulp.task('build', ['backend:prod', 'assets']);
 
 /**
  * Builds production packages for all supported architecures and places them in the dist directory.
  */
-gulp.task('build:cross', ['backend:prod:cross', 'build-frontend:cross']);
+gulp.task('build:cross', ['backend:prod:cross', 'build-frontend:cross', 'assets']);
 
 /**
  * Builds production version of the frontend application for the default architecture.

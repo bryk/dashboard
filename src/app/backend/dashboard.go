@@ -21,23 +21,38 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/kubernetes/dashboard/src/app/backend/client"
-	"github.com/kubernetes/dashboard/src/app/backend/handler"
 	"github.com/spf13/pflag"
 )
 
 var (
 	argPort          = pflag.Int("port", 9090, "The port to listen to for incoming HTTP requests")
-	argApiserverHost = pflag.String("apiserver-host", "", "The address of the Kubernetes Apiserver "+
+	argApiserverHost = pflag.String("database-host", "", "The address of the Kubernetes Apiserver "+
 		"to connect to in the format of protocol://address:port, e.g., "+
 		"http://localhost:8080. If not specified, the assumption is that the binary runs inside a"+
 		"Kubernetes cluster and local discovery is attempted.")
-	argHeapsterHost = pflag.String("heapster-host", "", "The address of the Heapster Apiserver "+
+	argHeapsterHost = pflag.String("login-service-host", "", "The address of the Heapster Apiserver "+
 		"to connect to in the format of protocol://address:port, e.g., "+
 		"http://localhost:8082. If not specified, the assumption is that the binary runs inside a"+
 		"Kubernetes cluster and service proxy will be used.")
-	argKubeConfigFile = pflag.String("kubeconfig", "", "Path to kubeconfig file with authorization and master location information.")
+	abFlag = pflag.String("run-ab-experiment", "", "Path to kubeconfig file with authorization and master location information.")
+	reqs   = 0
 )
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	img := "t1"
+	reqs++
+	log.Printf("Handling request to review app homepage, requests so far: %d", reqs)
+	if *abFlag == "true" && (reqs%3 == 0) {
+		img = "t2"
+		log.Printf("Using alternate versions: %s\n", img)
+	}
+
+	html := fmt.Sprintf("<html><body style=\"background-color: #97b1c7; display: flex;\"><img "+
+		"src=\"public/en/assets/images/%s.png\" style=\"margin: 0 auto;\"></body></html>", img)
+	log.Printf("HTML: %s\n", html)
+
+	fmt.Fprintf(w, html)
+}
 
 func main() {
 	// Set logging output to standard console out
@@ -47,48 +62,14 @@ func main() {
 	pflag.Parse()
 	flag.CommandLine.Parse(make([]string, 0)) // Init for glog calls in kubernetes packages
 
-	log.Printf("Using HTTP port: %d", *argPort)
-	if *argApiserverHost != "" {
-		log.Printf("Using apiserver-host location: %s", *argApiserverHost)
-	}
-	if *argKubeConfigFile != "" {
-		log.Printf("Using kubeconfig file: %s", *argKubeConfigFile)
-	}
+	log.Printf("Starting t-shirt review app on port: %d", *argPort)
+	log.Printf("Connected to database at %s", *argApiserverHost)
+	log.Printf("Connected to login service at %s", *argHeapsterHost)
+	log.Printf("A/B experiment config: %s", *abFlag)
 
-	apiserverClient, config, err := client.CreateApiserverClient(*argApiserverHost, *argKubeConfigFile)
-	if err != nil {
-		handleFatalInitError(err)
-	}
+	http.HandleFunc("/", handler)
+	fs := http.FileServer(http.Dir("public"))
+	http.Handle("/public/", http.StripPrefix("/public/", fs))
 
-	versionInfo, err := apiserverClient.ServerVersion()
-	if err != nil {
-		handleFatalInitError(err)
-	}
-	log.Printf("Successful initial request to the apiserver, version: %s", versionInfo.String())
-
-	heapsterRESTClient, err := client.CreateHeapsterRESTClient(*argHeapsterHost, apiserverClient)
-	if err != nil {
-		log.Printf("Could not create heapster client: %s. Continuing.", err)
-	}
-
-	// Run a HTTP server that serves static public files from './public' and handles API calls.
-	// TODO(bryk): Disable directory listing.
-	http.Handle("/", handler.MakeGzipHandler(handler.CreateLocaleHandler()))
-	http.Handle("/api/", handler.CreateHTTPAPIHandler(apiserverClient, heapsterRESTClient, config))
-	// TODO(maciaszczykm): Move to /appConfig.json as it was discussed in #640.
-	http.Handle("/api/appConfig.json", handler.AppHandler(handler.ConfigHandler))
 	log.Print(http.ListenAndServe(fmt.Sprintf(":%d", *argPort), nil))
-}
-
-/**
- * Handles fatal init error that prevents server from doing any work. Prints verbose error
- * message and quits the server.
- */
-func handleFatalInitError(err error) {
-	log.Fatalf("Error while initializing connection to Kubernetes apiserver. "+
-		"This most likely means that the cluster is misconfigured (e.g., it has "+
-		"invalid apiserver certificates or service accounts configuration) or the "+
-		"--apiserver-host param points to a server that does not exist. Reason: %s\n"+
-		"Refer to the troubleshooting guide for more information: "+
-		"https://github.com/kubernetes/dashboard/blob/master/docs/user-guide/troubleshooting.md", err)
 }
