@@ -34,7 +34,7 @@ var (
 		"to connect to in the format of protocol://address:port, e.g., "+
 		"http://localhost:8082. If not specified, the assumption is that the binary runs inside a"+
 		"Kubernetes cluster and service proxy will be used.")
-	abFlag = pflag.String("run-ab-experiment", "", "Path to kubeconfig file with authorization and master location information.")
+	abFlag = os.Getenv("AB_EXPERIMENT_TURNED_ON");
 	reqs   = 0
 )
 
@@ -42,7 +42,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	img := "t1"
 	reqs++
 	log.Printf("Handling request to review app homepage, requests so far: %d", reqs)
-	if *abFlag == "true" && (reqs%3 == 0) {
+	if abFlag == "true" && (reqs%3 == 0) {
 		img = "t2"
 		log.Printf("Using alternate versions: %s\n", img)
 	}
@@ -65,7 +65,7 @@ func main() {
 	log.Printf("Starting t-shirt review app on port: %d", *argPort)
 	log.Printf("Connected to database at %s", *argApiserverHost)
 	log.Printf("Connected to login service at %s", *argHeapsterHost)
-	log.Printf("A/B experiment config: %s", *abFlag)
+	log.Printf("A/B experiment config: %s", abFlag)
 
 	http.HandleFunc("/", handler)
 	fs := http.FileServer(http.Dir("public"))

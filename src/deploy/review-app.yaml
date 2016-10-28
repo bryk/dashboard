@@ -44,7 +44,13 @@ spec:
           # Uncomment the following line to manually specify Kubernetes API server Host
           # If not specified, Dashboard will attempt to auto discover the API server and connect
           # to it. Uncomment only if the default does not work.
-          # - --apiserver-host=http://my-address:port
+          # - --run-ab-experiment=true
+        env:
+        - name: AB_EXPERIMENT_TURNED_ON
+          valueFrom:
+            configMapKeyRef:
+              name: experiment-config-map
+              key: ab-experiment-turned-on
         livenessProbe:
           httpGet:
             path: /
@@ -60,9 +66,17 @@ metadata:
   name: review-app
   namespace: default
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
   - port: 80
     targetPort: 9090
   selector:
     app: review-app
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: experiment-config-map
+  namespace: default
+data:
+  ab-experiment-turned-on: "true"
